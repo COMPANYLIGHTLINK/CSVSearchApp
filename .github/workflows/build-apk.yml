@@ -21,15 +21,13 @@ jobs:
           cache: gradle
 
       - name: Create local.properties
-        run: |
-          echo "sdk.dir=$ANDROID_SDK_ROOT" > local.properties
-          cat local.properties
+        run: echo "sdk.dir=$ANDROID_SDK_ROOT" > local.properties
 
       - name: Install Android SDK components
         run: |
           yes | $ANDROID_SDK_ROOT/cmdline-tools/latest/bin/sdkmanager \
             "platforms;android-34" \
-            "build-tools;34.0.0" 2>&1 | tail -5 || true
+            "build-tools;34.0.0"
 
       - name: Cache Gradle packages
         uses: actions/cache@v4
@@ -43,20 +41,21 @@ jobs:
       - name: Download Gradle Wrapper JAR
         run: |
           mkdir -p gradle/wrapper
-          curl -sSfL \
-            "https://raw.githubusercontent.com/gradle/gradle/v8.4.0/gradle/wrapper/gradle-wrapper.jar" \
+          curl -sSfL "https://raw.githubusercontent.com/gradle/gradle/v8.4.0/gradle/wrapper/gradle-wrapper.jar" \
             -o gradle/wrapper/gradle-wrapper.jar
-          ls -lh gradle/wrapper/gradle-wrapper.jar
 
       - name: Make gradlew executable
         run: chmod +x gradlew
 
       - name: Build Debug APK
-        run: bash gradlew assembleDebug --no-daemon --stacktrace
+        run: ./gradlew assembleDebug --no-daemon --stacktrace
+
+      - name: Show APK files
+        run: find . -name "*.apk"
 
       - name: Upload APK
         uses: actions/upload-artifact@v4
         with:
           name: CSVSearchApp-debug-APK
-          path: app/build/outputs/apk/debug/app-debug.apk
+          path: app/build/outputs/apk/debug/*.apk
           retention-days: 30
