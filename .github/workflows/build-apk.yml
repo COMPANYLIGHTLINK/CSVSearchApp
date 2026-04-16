@@ -3,7 +3,7 @@ name: Build Debug APK
 on:
   push:
     branches: [ main, master ]
-  workflow_dispatch:   # lets you click "Run workflow" manually on GitHub
+  workflow_dispatch:
 
 jobs:
   build:
@@ -18,17 +18,32 @@ jobs:
         with:
           java-version: '17'
           distribution: 'temurin'
-          cache: gradle
 
-      - name: Grant execute permission to gradlew
+      - name: Download Gradle Wrapper JAR
+        run: |
+          mkdir -p gradle/wrapper
+          curl -sSfL "https://github.com/gradle/gradle/raw/v8.4.0/gradle/wrapper/gradle-wrapper.jar" -o gradle/wrapper/gradle-wrapper.jar
+          echo "Wrapper JAR size: $(ls -lh gradle/wrapper/gradle-wrapper.jar)"
+
+      - name: Make gradlew executable
         run: chmod +x gradlew
 
-      - name: Build Debug APK
-        run: ./gradlew assembleDebug --no-daemon
+      - name: Cache Gradle packages
+        uses: actions/cache@v4
+        with:
+          path: |
+            ~/.gradle/caches
+            ~/.gradle/wrapper
+          key: ${{ runner.os }}-gradle-${{ hashFiles('**/*.gradle*', '**/gradle-wrapper.properties') }}
+          restore-keys: |
+            ${{ runner.os }}-gradle-
 
-      - name: Upload APK artifact
+      - name: Build Debug APK
+        run: ./gradlew assembleDebug --no-daemon --stacktrace
+
+      - name: Upload APK
         uses: actions/upload-artifact@v4
         with:
-          name: CSVSearchApp-debug
+          name: CSVSearchApp-debug-APK
           path: app/build/outputs/apk/debug/app-debug.apk
           retention-days: 30
