@@ -1,0 +1,27 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- Brand colors -->
+    <color name="primary">#1565C0</color>
+    <color name="primary_variant">#003C8F</color>
+    <color name="on_primary">#FFFFFF</color>
+
+    <color name="secondary">#0288D1</color>
+    <color name="secondary_variant">#005B9F</color>
+    <color name="on_secondary">#FFFFFF</color>
+
+    <!-- Backgrounds -->
+    <color name="background">#F5F7FA</color>
+    <color name="surface">#FFFFFF</color>
+    <color name="result_bar_bg">#EEF2FF</color>
+
+    <!-- Text -->
+    <color name="text_primary">#1A1A2E</color>
+    <color name="text_secondary">#6B7280</color>
+
+    <!-- Utility -->
+    <color name="divider">#E5E7EB</color>
+    <color name="error">#CC0000</color>
+
+    <!-- Status bar -->
+    <color name="statusBarColor">#003C8F</color>
+</resources>

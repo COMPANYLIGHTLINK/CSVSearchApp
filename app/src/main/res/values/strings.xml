@@ -1,0 +1,8 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="app_name">CSV Search</string>
+    <string name="search_hint">Search records…</string>
+    <string name="no_results">No records found.\nTry a different keyword.</string>
+    <string name="importing">Importing CSV…</string>
+    <string name="import_success">Import complete!</string>
+</resources>

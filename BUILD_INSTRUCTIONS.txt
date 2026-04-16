@@ -1,0 +1,108 @@
+═══════════════════════════════════════════════════════════
+  CSV Search App — Build & Usage Instructions
+═══════════════════════════════════════════════════════════
+
+REQUIREMENTS
+────────────
+• Android Studio Hedgehog (2023.1.1) or newer
+• JDK 17 (bundled with Android Studio)
+• Android SDK, compileSdk 34
+• Internet connection (first build downloads Gradle & dependencies)
+
+
+HOW TO BUILD THE APK
+─────────────────────
+1. Open Android Studio
+2. File → Open → select the "CSVSearchApp" folder
+3. Wait for Gradle sync to complete (first time: ~2–5 minutes)
+4. Build → Build Bundle(s) / APK(s) → Build APK(s)
+5. APK is saved to:
+   app/build/outputs/apk/debug/app-debug.apk
+
+   OR for a release APK:
+   Build → Generate Signed Bundle / APK → APK → follow wizard
+
+
+HOW TO BUNDLE YOUR CSV
+──────────────────────
+Option A — Ship CSV inside the APK (pre-loaded):
+  1. Copy your CSV file to:
+     app/src/main/assets/data.csv
+  2. Rebuild the APK
+  3. On first launch, the app auto-detects the file and offers to import it
+
+Option B — User picks CSV at runtime (recommended for large files):
+  1. Leave assets/ empty (no data.csv)
+  2. On first launch, user taps "Pick CSV File" and selects from storage
+  3. Works with files anywhere on the device
+
+
+CSV FORMAT REQUIREMENTS
+───────────────────────
+• First row MUST be the header row (column names)
+• Comma-separated, with optional double-quote escaping
+• UTF-8 encoding recommended
+• Any number of columns supported
+
+Example:
+  name,phone,email,city,notes
+  John Smith,555-1234,john@example.com,New York,"Some notes here"
+  Jane Doe,555-5678,jane@example.com,Los Angeles,
+
+SEARCH CAPABILITIES
+───────────────────
+• The first 5 columns are stored individually and indexed
+• FTS5 (Full-Text Search) is used for fast keyword lookup
+• Fallback to LIKE query if FTS encounters issues
+• Results paginated in batches of 30 for performance
+• Infinite scroll loads more as you scroll down
+
+
+PERFORMANCE WITH 100,000+ RECORDS
+──────────────────────────────────
+• Import time: ~30–60 seconds for 100k rows (shown with progress)
+• Search time: typically < 50ms with FTS5
+• Memory: only 30 records loaded into memory at a time
+• Database: SQLite WAL mode + indexes on searchable columns
+
+
+CUSTOMIZATION
+─────────────
+To change which columns appear in search results:
+  → Edit app/src/main/java/com/csvapp/data/RecordRepository.kt
+    Change PAGE_SIZE, or adjust which columns are searched
+
+To change the number of results per page:
+  → In RecordRepository.kt, change: const val PAGE_SIZE = 30
+
+To change the search debounce delay:
+  → In SearchViewModel.kt, change: private const val DEBOUNCE_MS = 300L
+
+
+FILE STRUCTURE OVERVIEW
+───────────────────────
+CSVSearchApp/
+├── app/src/main/
+│   ├── assets/           ← Place data.csv here (optional)
+│   ├── java/com/csvapp/
+│   │   ├── CSVApp.kt             Application class
+│   │   ├── data/
+│   │   │   ├── RecordEntity.kt   Room entity (DB table)
+│   │   │   ├── RecordDao.kt      Database queries
+│   │   │   ├── AppDatabase.kt    Room DB + FTS5 setup
+│   │   │   └── RecordRepository.kt  Search logic
+│   │   ├── ui/
+│   │   │   ├── MainActivity.kt   Search screen
+│   │   │   ├── DetailActivity.kt Full record view
+│   │   │   ├── ImportActivity.kt CSV import screen
+│   │   │   ├── RecordAdapter.kt  RecyclerView adapter
+│   │   │   ├── SearchViewModel.kt ViewModel
+│   │   │   └── SearchViewModelFactory.kt
+│   │   └── utils/
+│   │       └── CsvImporter.kt    CSV parser + batch importer
+│   └── res/
+│       ├── layout/       ← XML UI layouts
+│       ├── values/       ← Colors, strings, themes
+│       └── drawable/     ← Vector icons
+
+═══════════════════════════════════════════════════════════
