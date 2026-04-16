@@ -48,7 +48,7 @@ jobs:
         run: chmod +x gradlew
 
       - name: Build Debug APK
-        run: ./gradlew assembleDebug --no-daemon --stacktrace
+        run: bash gradlew assembleDebug --no-daemon --stacktrace
 
       - name: Show APK files
         run: find . -name "*.apk"

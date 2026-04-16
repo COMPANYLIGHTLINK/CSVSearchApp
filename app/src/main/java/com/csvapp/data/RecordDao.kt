@@ -7,6 +7,7 @@ import androidx.room.Query
 import androidx.room.RawQuery
 import androidx.sqlite.db.SupportSQLiteQuery
 
+
 /**
  * Data Access Object for the records table.
  *
@@ -87,7 +88,4 @@ interface RecordDao {
 
     @Query("DELETE FROM records")
     suspend fun deleteAll()
-
-    @RawQuery
-    suspend fun runRaw(query: SupportSQLiteQuery): Int
 }

@@ -119,8 +119,7 @@ class RecordRepository(private val dao: RecordDao) {
 
     suspend fun clearAll() = withContext(Dispatchers.IO) {
         dao.deleteAll()
-        // Also clear FTS index
-        dao.runRaw(SimpleSQLiteQuery("DELETE FROM records_fts"))
+        // FTS index is automatically cleared by the records_ad trigger on DELETE
     }
 }
 

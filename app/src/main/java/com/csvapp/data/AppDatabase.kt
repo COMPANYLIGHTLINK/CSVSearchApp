@@ -17,7 +17,7 @@ import androidx.sqlite.db.SupportSQLiteDatabase
 @Database(
     entities = [RecordEntity::class],
     version = 1,
-    exportSchema = true
+    exportSchema = false
 )
 abstract class AppDatabase : RoomDatabase() {
 

@@ -19,11 +19,6 @@ android {
 
         // Enable multiDex for large apps
         multiDexEnabled true
-
-        // Room schema export directory
-        ksp {
-            arg("room.schemaLocation", "$projectDir/schemas")
-        }
     }
 
     buildTypes {
