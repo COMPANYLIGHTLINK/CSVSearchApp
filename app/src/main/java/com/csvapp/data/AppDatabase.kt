@@ -67,37 +67,38 @@ abstract class AppDatabase : RoomDatabase() {
         }
 
         private fun setupFts(db: SupportSQLiteDatabase) {
-            // FTS5 external-content table — indexes col1..col5 for fast search
-            db.execSQL("""
-                CREATE VIRTUAL TABLE IF NOT EXISTS records_fts
-                USING fts5(
-                    col1, col2, col3, col4, col5,
-                    content='records',
-                    content_rowid='id',
-                    tokenize='unicode61 remove_diacritics 1'
-                )
-            """.trimIndent())
+            try {
+                // FTS5 external-content table — indexes col1..col5 for fast search
+                db.execSQL("""
+                    CREATE VIRTUAL TABLE IF NOT EXISTS records_fts
+                    USING fts5(
+                        col1, col2, col3, col4, col5,
+                        content='records',
+                        content_rowid='id',
+                        tokenize='unicode61 remove_diacritics 1'
+                    )
+                """.trimIndent())
 
-            // Trigger: keep FTS in sync on INSERT
-            db.execSQL("""
-                CREATE TRIGGER IF NOT EXISTS records_ai
-                AFTER INSERT ON records BEGIN
-                    INSERT INTO records_fts(rowid, col1, col2, col3, col4, col5)
-                    VALUES (new.id, new.col1, new.col2, new.col3, new.col4, new.col5);
-                END
-            """.trimIndent())
+                // Trigger: keep FTS in sync on INSERT
+                db.execSQL("""
+                    CREATE TRIGGER IF NOT EXISTS records_ai
+                    AFTER INSERT ON records BEGIN
+                        INSERT INTO records_fts(rowid, col1, col2, col3, col4, col5)
+                        VALUES (new.id, new.col1, new.col2, new.col3, new.col4, new.col5);
+                    END
+                """.trimIndent())
 
-            // Trigger: keep FTS in sync on DELETE
-            db.execSQL("""
-                CREATE TRIGGER IF NOT EXISTS records_ad
-                AFTER DELETE ON records BEGIN
-                    INSERT INTO records_fts(records_fts, rowid, col1, col2, col3, col4, col5)
-                    VALUES ('delete', old.id, old.col1, old.col2, old.col3, old.col4, old.col5);
-                END
-            """.trimIndent())
+                // Trigger: keep FTS in sync on DELETE
+                db.execSQL("""
+                    CREATE TRIGGER IF NOT EXISTS records_ad
+                    AFTER DELETE ON records BEGIN
+                        INSERT INTO records_fts(records_fts, rowid, col1, col2, col3, col4, col5)
+                        VALUES ('delete', old.id, old.col1, old.col2, old.col3, old.col4, old.col5);
+                    END
+                """.trimIndent())
 
-            // Trigger: keep FTS in sync on UPDATE
-            db.execSQL("""
+                // Trigger: keep FTS in sync on UPDATE
+                db.execSQL("""
                 CREATE TRIGGER IF NOT EXISTS records_au
                 AFTER UPDATE ON records BEGIN
                     INSERT INTO records_fts(records_fts, rowid, col1, col2, col3, col4, col5)
@@ -106,6 +107,9 @@ abstract class AppDatabase : RoomDatabase() {
                     VALUES (new.id, new.col1, new.col2, new.col3, new.col4, new.col5);
                 END
             """.trimIndent())
+            } catch (e: Exception) {
+                // FTS5 not available on this device — will fall back to LIKE search
+                // This is expected on some older Android versions or custom ROMs
+            }
         }
-    }
 }

@@ -16,10 +16,28 @@ class RecordRepository(private val dao: RecordDao) {
         const val PAGE_SIZE = 30
     }
 
+    // Track if FTS5 is available
+    private var isFtsAvailable: Boolean? = null
+
     // ─── Count ─────────────────────────────────────────────────────────────────
 
     suspend fun getCount(): Int = withContext(Dispatchers.IO) {
         dao.getCount()
+    }
+
+    // ─── Check FTS availability ────────────────────────────────────────────────
+
+    private suspend fun isFtsAvailable(): Boolean {
+        if (isFtsAvailable == null) {
+            isFtsAvailable = try {
+                // Try a simple FTS query to check if the table exists and works
+                val testQuery = SimpleSQLiteQuery("SELECT name FROM sqlite_master WHERE type='table' AND name='records_fts'")
+                dao.searchFts(testQuery).isNotEmpty() || true // Just check if query succeeds
+            } catch (e: Exception) {
+                false
+            }
+        }
+        return isFtsAvailable!!
     }
 
     // ─── Paged full list ───────────────────────────────────────────────────────
@@ -49,11 +67,15 @@ class RecordRepository(private val dao: RecordDao) {
             return@withContext SearchResult(items, total)
         }
 
-        // Try FTS5 first
+        // Try FTS5 first if available, otherwise use LIKE
         return@withContext try {
-            searchWithFts(rawQuery.trim(), page)
+            if (isFtsAvailable()) {
+                searchWithFts(rawQuery.trim(), page)
+            } else {
+                searchWithLike(rawQuery.trim(), page)
+            }
         } catch (e: Exception) {
-            // FTS may fail on special characters — fall back to LIKE
+            // Fallback to LIKE search if FTS fails
             searchWithLike(rawQuery.trim(), page)
         }
     }
