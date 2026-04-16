@@ -112,4 +112,6 @@ abstract class AppDatabase : RoomDatabase() {
                 // This is expected on some older Android versions or custom ROMs
             }
         }
+    }
 }
+
